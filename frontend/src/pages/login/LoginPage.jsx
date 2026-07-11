@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Card } from '../../components/common/Card';
 import { Field, Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
+import { Icon } from '../../components/common/Icon';
 import { C } from '../../styles/theme';
 
 export function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
@@ -57,7 +59,35 @@ export function LoginPage({ onLogin }) {
             <Input placeholder="admin" value={username} onChange={(e) => setUsername(e.target.value)} autoFocus />
           </Field>
           <Field label="Password">
-            <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <div style={{ position: 'relative' }}>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ paddingRight: 40 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                style={{
+                  position: 'absolute',
+                  right: 8,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: 6,
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: C.txtMut,
+                }}
+              >
+                <Icon name={showPassword ? 'eyeOff' : 'eye'} size={17} />
+              </button>
+            </div>
           </Field>
 
           {error && (
