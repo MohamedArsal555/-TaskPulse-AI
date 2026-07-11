@@ -1,0 +1,21 @@
+{
+  "name": "taskpulse-ai-console",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:backend": "cd ../backend && uvicorn app.main:app --reload --port 8001",
+    "dev:all": "concurrently -n backend,frontend -c cyan,magenta \"npm run dev:backend\" \"npm run dev\"",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.2.0",
+    "concurrently": "^10.0.3",
+    "vite": "^8.0.16"
+  }
+}
