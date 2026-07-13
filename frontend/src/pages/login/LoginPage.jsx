@@ -48,7 +48,7 @@ export function LoginPage({ onLogin }) {
           TP
         </div>
         <h2 className="tp-serif" style={{ fontSize: 22, fontWeight: 600, marginTop: 16, color: C.txt }}>
-          Welcome back
+          TaskPulse AI
         </h2>
         <p style={{ fontSize: 13.5, color: C.txtSub, marginTop: 6, lineHeight: 1.5 }}>
           Sign in to reach the TaskPulse AI prediction console.
