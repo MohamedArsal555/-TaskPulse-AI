@@ -10,4 +10,5 @@ export const PAGE_TITLES = {
   delay: { title: 'Task Delay Prediction', subtitle: 'Estimate the delay risk of an in-progress task' },
   workload: { title: 'Workload Scoring', subtitle: 'Check an employee’s current capacity utilisation' },
   sprint: { title: 'Sprint Risk Prediction', subtitle: 'Assess whether a sprint is on track to complete' },
+  profile: { title: 'Profile', subtitle: 'Your account, access level and team' },
 };

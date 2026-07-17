@@ -3,9 +3,12 @@ import { Card } from '../../components/common/Card';
 import { Field, Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { ResultPanel } from '../../components/common/ResultPanel';
+import { ReadOnlyNotice } from '../../components/common/ReadOnlyNotice';
 import { scoreWorkload } from '../../services/workloadService';
 import { useApiAction } from '../../hooks/useApiAction';
 import { runValidators, required, gt, gte } from '../../utils/validators';
+import { addHistoryEntry } from '../../utils/historyStore';
+import { canEditNav } from '../../utils/roles';
 
 const initialForm = {
   employee_id: '',
@@ -21,19 +24,23 @@ const RULES = {
   available_capacity_hours: [required, (v) => gt(v, 0, 'Available capacity')],
 };
 
-export function WorkloadScorePage() {
+export function WorkloadScorePage({ role }) {
   const [form, setForm] = useState(initialForm);
   const [fieldErrors, setFieldErrors] = useState({});
   const { data, error, loading, run } = useApiAction(scoreWorkload);
+  const canEdit = canEditNav(role, 'workload');
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = runValidators(form, RULES);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
-    run(form);
+    const result = await run(form);
+    if (result) {
+      addHistoryEntry({ type: 'workload', subject: result.employee_id, score: result.workload_score, level: result.workload_level });
+    }
   };
 
   const breakdown = data
@@ -49,6 +56,10 @@ export function WorkloadScorePage() {
         <h3 style={{ fontSize: 15.5, fontWeight: 700, marginBottom: 20 }}>Employee capacity</h3>
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {!canEdit && (
+            <ReadOnlyNotice message={`${role.label} has ${role.permissions.workload === 'none' ? 'no' : 'view-only'} access to workload scoring.`} />
+          )}
+          <fieldset disabled={!canEdit} style={{ display: 'contents' }}>
           <div style={{ gridColumn: '1 / -1' }}>
             <Field label="Employee ID" error={fieldErrors.employee_id}>
               <Input placeholder="E203" value={form.employee_id} onChange={set('employee_id')} error={!!fieldErrors.employee_id} />
@@ -67,6 +78,7 @@ export function WorkloadScorePage() {
           <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
             <Button type="submit" loading={loading}>Calculate workload score</Button>
           </div>
+          </fieldset>
 
           {error && (
             <div style={{ gridColumn: '1 / -1', padding: '10px 14px', borderRadius: 9, background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', fontSize: 13 }}>

@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { C } from '../../styles/theme';
 import { NAV_ITEMS } from '../../utils/constants';
+import { canAccessNav } from '../../utils/roles';
 import { Icon } from '../common/Icon';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 
-export function Sidebar({ view, setView, onLogout }) {
+export function Sidebar({ view, setView, onLogout, role }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const items = NAV_ITEMS.filter((item) => canAccessNav(role, item.key));
 
   return (
     <aside
@@ -51,8 +53,25 @@ export function Sidebar({ view, setView, onLogout }) {
         </div>
       </div>
 
+      {role && (
+        <div
+          style={{
+            margin: '0 10px 18px',
+            padding: '8px 10px',
+            borderRadius: 8,
+            background: 'rgba(255,255,255,0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: role.color, flexShrink: 0 }} />
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#fff' }}>{role.label}</span>
+        </div>
+      )}
+
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV_ITEMS.map((item) => (
+        {items.map((item) => (
           <button
             key={item.key}
             className={`tp-nav-item${view === item.key ? ' active' : ''}`}
@@ -79,6 +98,28 @@ export function Sidebar({ view, setView, onLogout }) {
       </nav>
 
       <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <button
+          className={`tp-nav-item${view === 'profile' ? ' active' : ''}`}
+          onClick={() => setView('profile')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 11,
+            padding: '9px 12px',
+            borderRadius: 6,
+            border: 'none',
+            background: 'transparent',
+            color: 'inherit',
+            fontSize: 13.5,
+            fontWeight: 500,
+            textAlign: 'left',
+            cursor: 'pointer',
+          }}
+        >
+          <Icon name="user" size={16} />
+          Profile
+        </button>
+
         <button
           className="tp-nav-item"
           onClick={() => setConfirmOpen(true)}

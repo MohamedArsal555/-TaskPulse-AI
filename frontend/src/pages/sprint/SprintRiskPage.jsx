@@ -3,9 +3,12 @@ import { Card } from '../../components/common/Card';
 import { Field, Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { ResultPanel } from '../../components/common/ResultPanel';
+import { ReadOnlyNotice } from '../../components/common/ReadOnlyNotice';
 import { predictSprintRisk } from '../../services/sprintService';
 import { useApiAction } from '../../hooks/useApiAction';
 import { runValidators, required, gt, gte, range } from '../../utils/validators';
+import { addHistoryEntry } from '../../utils/historyStore';
+import { canEditNav } from '../../utils/roles';
 
 const initialForm = {
   sprint_id: '',
@@ -23,19 +26,23 @@ const RULES = {
   completed_story_points: [required, (v) => gte(v, 0, 'Completed story points')],
 };
 
-export function SprintRiskPage() {
+export function SprintRiskPage({ role }) {
   const [form, setForm] = useState(initialForm);
   const [fieldErrors, setFieldErrors] = useState({});
   const { data, error, loading, run } = useApiAction(predictSprintRisk);
+  const canEdit = canEditNav(role, 'sprint');
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = runValidators(form, RULES);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
-    run(form);
+    const result = await run(form);
+    if (result) {
+      addHistoryEntry({ type: 'sprint', subject: result.sprint_id, score: result.sprint_risk_score, level: result.risk_level });
+    }
   };
 
   const breakdown = data
@@ -55,6 +62,10 @@ export function SprintRiskPage() {
         <h3 style={{ fontSize: 15.5, fontWeight: 700, marginBottom: 20 }}>Sprint metrics</h3>
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {!canEdit && (
+            <ReadOnlyNotice message={`${role.label} has ${role.permissions.sprint === 'limited' ? 'high-level, summary-only' : 'view-only'} access to sprint risk.`} />
+          )}
+          <fieldset disabled={!canEdit} style={{ display: 'contents' }}>
           <div style={{ gridColumn: '1 / -1' }}>
             <Field label="Sprint ID" error={fieldErrors.sprint_id}>
               <Input placeholder="S12" value={form.sprint_id} onChange={set('sprint_id')} error={!!fieldErrors.sprint_id} />
@@ -76,6 +87,7 @@ export function SprintRiskPage() {
           <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
             <Button type="submit" loading={loading}>Predict sprint risk</Button>
           </div>
+          </fieldset>
 
           {error && (
             <div style={{ gridColumn: '1 / -1', padding: '10px 14px', borderRadius: 9, background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', fontSize: 13 }}>

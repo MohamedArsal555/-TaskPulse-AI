@@ -30,16 +30,22 @@ export const C = {
 };
 
 // Shared semantic risk/level colors — muted rather than neon.
+// `tier` buckets the many level strings the three predictors use (Low/Healthy/
+// Balanced/Underloaded, Medium/At Risk, High/Critical/Overloaded) into one
+// good/watch/risk axis so cross-tool KPIs can group them consistently.
 export const RISK = {
-  Low:         { c: '#3d6b4a', bg: '#e9efe8', dot: '#4c8058', bd: '#cddecd' },
-  Healthy:     { c: '#3d6b4a', bg: '#e9efe8', dot: '#4c8058', bd: '#cddecd' },
-  Balanced:    { c: '#3d6b4a', bg: '#e9efe8', dot: '#4c8058', bd: '#cddecd' },
-  Underloaded: { c: '#3c5b72', bg: '#e7edf1', dot: '#4e7793', bd: '#c9d8e0' },
-  Medium:      { c: '#8a5a1f', bg: '#f3ead9', dot: '#b0832f', bd: '#e4d1a3' },
-  'At Risk':   { c: '#8a5a1f', bg: '#f3ead9', dot: '#b0832f', bd: '#e4d1a3' },
-  High:        { c: '#9c3f2c', bg: '#f5e5e0', dot: '#b1502f', bd: '#e6c6ba' },
-  Critical:    { c: '#9c3f2c', bg: '#f5e5e0', dot: '#b1502f', bd: '#e6c6ba' },
-  Overloaded:  { c: '#9c3f2c', bg: '#f5e5e0', dot: '#b1502f', bd: '#e6c6ba' },
+  Low:         { tier: 'good',  c: '#3d6b4a', bg: '#e9efe8', dot: '#4c8058', bd: '#cddecd' },
+  Healthy:     { tier: 'good',  c: '#3d6b4a', bg: '#e9efe8', dot: '#4c8058', bd: '#cddecd' },
+  Balanced:    { tier: 'good',  c: '#3d6b4a', bg: '#e9efe8', dot: '#4c8058', bd: '#cddecd' },
+  Underloaded: { tier: 'good',  c: '#3c5b72', bg: '#e7edf1', dot: '#4e7793', bd: '#c9d8e0' },
+  Medium:      { tier: 'watch', c: '#8a5a1f', bg: '#f3ead9', dot: '#b0832f', bd: '#e4d1a3' },
+  'At Risk':   { tier: 'watch', c: '#8a5a1f', bg: '#f3ead9', dot: '#b0832f', bd: '#e4d1a3' },
+  High:        { tier: 'risk',  c: '#9c3f2c', bg: '#f5e5e0', dot: '#b1502f', bd: '#e6c6ba' },
+  Critical:    { tier: 'risk',  c: '#9c3f2c', bg: '#f5e5e0', dot: '#b1502f', bd: '#e6c6ba' },
+  Overloaded:  { tier: 'risk',  c: '#9c3f2c', bg: '#f5e5e0', dot: '#b1502f', bd: '#e6c6ba' },
 };
 
 export const riskColor = (level) => RISK[level] || { c: C.txtSub, bg: C.p50, dot: C.p400, bd: C.border };
+
+// Coarse good/watch/risk bucket for a level string, for cross-predictor KPIs.
+export const riskTier = (level) => RISK[level]?.tier || 'watch';

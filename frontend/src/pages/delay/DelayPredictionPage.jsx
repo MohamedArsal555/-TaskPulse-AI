@@ -3,9 +3,12 @@ import { Card } from '../../components/common/Card';
 import { Field, Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { ResultPanel } from '../../components/common/ResultPanel';
+import { ReadOnlyNotice } from '../../components/common/ReadOnlyNotice';
 import { predictDelay } from '../../services/delayService';
 import { useApiAction } from '../../hooks/useApiAction';
 import { runValidators, required, gt, gte, range } from '../../utils/validators';
+import { addHistoryEntry } from '../../utils/historyStore';
+import { canEditNav } from '../../utils/roles';
 
 const initialForm = {
   task_id: '',
@@ -27,19 +30,23 @@ const RULES = {
   employee_past_delay_rate: [(v) => range(v, 0, 1, 'Past delay rate')],
 };
 
-export function DelayPredictionPage() {
+export function DelayPredictionPage({ role }) {
   const [form, setForm] = useState(initialForm);
   const [fieldErrors, setFieldErrors] = useState({});
   const { data, error, loading, run } = useApiAction(predictDelay);
+  const canEdit = canEditNav(role, 'delay');
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = runValidators(form, RULES);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
-    run(form);
+    const result = await run(form);
+    if (result) {
+      addHistoryEntry({ type: 'delay', subject: result.task_id, score: result.delay_risk_score, level: result.risk_level });
+    }
   };
 
   const breakdown = data
@@ -57,6 +64,10 @@ export function DelayPredictionPage() {
         <h3 style={{ fontSize: 15.5, fontWeight: 700, marginBottom: 20 }}>Task details</h3>
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {!canEdit && (
+            <ReadOnlyNotice message={`${role.label} has view-only access to task delay predictions.`} />
+          )}
+          <fieldset disabled={!canEdit} style={{ display: 'contents' }}>
           <div style={{ gridColumn: '1 / -1' }}>
             <Field label="Task ID" error={fieldErrors.task_id}>
               <Input placeholder="T101" value={form.task_id} onChange={set('task_id')} error={!!fieldErrors.task_id} />
@@ -84,6 +95,7 @@ export function DelayPredictionPage() {
           <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
             <Button type="submit" loading={loading}>Predict delay risk</Button>
           </div>
+          </fieldset>
 
           {error && (
             <div style={{ gridColumn: '1 / -1', padding: '10px 14px', borderRadius: 9, background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', fontSize: 13 }}>
