@@ -1,6 +1,7 @@
 from fastapi import APIRouter
-from app.models.schemas import WorkloadScoreRequest, WorkloadScoreResponse
-from app.services.scoring_logic import calculate_workload_score
+
+from app.schemas.workload_schema import WorkloadScoreRequest, WorkloadScoreResponse
+from app.services.workload_service import calculate_workload_score
 
 router = APIRouter()
 

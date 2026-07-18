@@ -1,23 +1,33 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import delay, workload, sprint_risk
+from fastapi.responses import JSONResponse
+
+from app.core.config import settings
+from app.core.exceptions import AppException
+from app.routes import delay_routes, workload_routes, sprint_risk_routes
 
 app = FastAPI(
-    title="TaskPulse AI - AI/ML Microservice",
-    description="Handles task delay prediction, workload scoring, and sprint risk prediction for TaskPulse AI.",
-    version="0.1.0"
+    title=settings.APP_NAME,
+    description=settings.APP_DESCRIPTION,
+    version=settings.APP_VERSION,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(delay.router, prefix="/api/v1", tags=["Task Delay Prediction"])
-app.include_router(workload.router, prefix="/api/v1", tags=["Workload Scoring"])
-app.include_router(sprint_risk.router, prefix="/api/v1", tags=["Sprint Risk Prediction"])
+
+@app.exception_handler(AppException)
+def handle_app_exception(request: Request, exc: AppException):
+    return JSONResponse(status_code=exc.status_code, content={"success": False, "message": exc.message})
+
+
+app.include_router(delay_routes.router, prefix="/api/v1", tags=["Task Delay Prediction"])
+app.include_router(workload_routes.router, prefix="/api/v1", tags=["Workload Scoring"])
+app.include_router(sprint_risk_routes.router, prefix="/api/v1", tags=["Sprint Risk Prediction"])
 
 
 @app.get("/")

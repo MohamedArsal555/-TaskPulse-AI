@@ -1,6 +1,7 @@
 from fastapi import APIRouter
-from app.models.schemas import SprintRiskRequest, SprintRiskResponse
-from app.services.scoring_logic import predict_sprint_risk
+
+from app.schemas.sprint_risk_schema import SprintRiskRequest, SprintRiskResponse
+from app.services.sprint_risk_service import predict_sprint_risk
 
 router = APIRouter()
 

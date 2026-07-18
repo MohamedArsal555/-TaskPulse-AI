@@ -1,6 +1,7 @@
 from fastapi import APIRouter
-from app.models.schemas import DelayPredictionRequest, DelayPredictionResponse
-from app.services.scoring_logic import predict_task_delay
+
+from app.schemas.delay_schema import DelayPredictionRequest, DelayPredictionResponse
+from app.services.delay_service import predict_task_delay
 
 router = APIRouter()
 
